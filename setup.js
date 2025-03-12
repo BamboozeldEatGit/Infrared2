@@ -1,5 +1,5 @@
 const simpleGit = require('simple-git');
-const fs = require('fs').promises;
+const fs = require('fs-extra');
 const path = require('path');
 const { execSync } = require('child_process');
 const net = require('net');
@@ -135,98 +135,60 @@ async function setupRepo(git, repoUrl, localPath, name) {
 }
 
 async function setupRepos() {
-    // Verify Node.js installation first
-    if (!verifyNodeInstallation()) {
-        process.exit(1);
-    }
-
-    console.log('\x1b[31m');
-    console.log(`
-██╗███╗   ██╗███████╗██████╗  █████╗ ██████╗ ███████╗██████╗ 
-██║████╗  ██║██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔════╝██╔══██╗
-██║██╔██╗ ██║█████╗  ██████╔╝███████║██████╔╝█████╗  ██║  ██║
-██║██║╚██╗██║██╔══╝  ██╔══██╗██╔══██║██╔══██╗██╔══╝  ██║  ██║
-██║██║ ╚████║██║     ██║  ██║██║  ██║██║  ██║███████╗██████╔╝
-╚═╝╚═╝  ╚═══╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═════╝ 
-`);
-    console.log('\x1b[0m');
-
-    // Clean up and create repos directory
-    await cleanup();
-    console.log('Creating fresh repos directory...');
-    await fs.mkdir('repos', { recursive: true });
-    console.log('\x1b[32m✓ Created fresh repos directory\x1b[0m');
-
-    const git = simpleGit();
-    let success = true;
-
-    // Setup Doge Unblocker
-    const dogePath = path.join(process.cwd(), 'repos', 'doge');
-    success = success && await setupRepo(git, 'https://github.com/DogeNetwork/v4.git', dogePath, 'Doge Unblocker');
+    console.log('Setting up repositories...');
     
-    if (success) {
-        console.log('Creating Doge Unblocker directories...');
-        // Create necessary directories for Doge
-        const dogeDirs = ['static', 'public', 'uv', 'codec'];
-        for (const dir of dogeDirs) {
-            await fs.mkdir(path.join(dogePath, dir), { recursive: true });
-        }
-
-        // Create Doge .env file
-        console.log('Creating Doge Unblocker .env file...');
-        const dogeEnv = `
-PORT=3000
+    const reposDir = path.join(__dirname, 'repos');
+    
+    // Ensure repos directory exists and is empty
+    await fs.ensureDir(reposDir);
+    await fs.emptyDir(reposDir);
+    
+    // Clone Doge Unblocker
+    console.log('Cloning Doge Unblocker...');
+    const dogeDir = path.join(reposDir, 'doge');
+    await simpleGit().clone('https://github.com/DogeNetwork/Doge-Unblocker.git', dogeDir);
+    
+    // Clone Interstellar
+    console.log('Cloning Interstellar...');
+    const interstellarDir = path.join(reposDir, 'interstellar');
+    await simpleGit().clone('https://github.com/interstellarnetwork/interstellar.git', interstellarDir);
+    
+    // Create .env files
+    console.log('Creating environment files...');
+    
+    // Doge Unblocker .env
+    const dogeEnv = `
+PORT=8000
 BARE_SERVER="/bare/"
 UV_DIR="uv"
 CODEC_DIR="codec"
-BARE_APIS="https://uv.holyubofficial.net/bare1/,https://uv.holyubofficial.net/bare2/,https://uv.holyubofficial.net/bare3/"
-`.trim();
-        await fs.writeFile(path.join(dogePath, '.env'), dogeEnv);
-        console.log('\x1b[32m✓ Doge Unblocker configuration created\x1b[0m');
-    }
-
-    // Setup Interstellar
-    const interstellarPath = path.join(process.cwd(), 'repos', 'interstellar');
-    success = success && await setupRepo(git, 'https://github.com/UseInterstellar/Interstellar.git', interstellarPath, 'Interstellar');
+BARE_APIS="https://uv.holyubofficial.net/,https://int.holyubofficial.net/,https://holy.holyubofficial.net/,https://rammerhead.holyubofficial.net/,https://uv.raider.tk/,https://int.raider.tk/,https://holy.raider.tk/,https://rammerhead.raider.tk/"
+    `.trim();
     
-    if (success) {
-        console.log('Creating Interstellar .env file...');
-        // Create Interstellar .env file
-        const interstellarEnv = `PORT=3001`.trim();
-        await fs.writeFile(path.join(interstellarPath, '.env'), interstellarEnv);
-        console.log('\x1b[32m✓ Interstellar configuration created\x1b[0m');
-    }
-
+    await fs.writeFile(path.join(dogeDir, '.env'), dogeEnv);
+    
+    // Interstellar .env
+    const interstellarEnv = `
+PORT=8080
+    `.trim();
+    
+    await fs.writeFile(path.join(interstellarDir, '.env'), interstellarEnv);
+    
+    // Install dependencies
+    console.log('Installing dependencies...');
+    
     // Save port configuration
-    console.log('Saving port configuration...');
     const portConfig = {
-        dogePort: 3000,
-        interstellarPort: 3001,
-        timestamp: new Date().toISOString()
+        doge: 8000,
+        interstellar: 8080
     };
-    await fs.writeFile('port-config.json', JSON.stringify(portConfig, null, 2));
-
-    if (success) {
-        console.log('\n\x1b[32m✓ All repositories set up successfully!\x1b[0m');
-        console.log(`\x1b[32m✓ Doge Unblocker configured for port 3000\x1b[0m`);
-        console.log(`\x1b[32m✓ Interstellar configured for port 3001\x1b[0m`);
-    } else {
-        console.error('\n\x1b[31m✗ Some repositories failed to set up properly. Please check the errors above and try again.\x1b[0m');
-        process.exit(1);
-    }
+    
+    await fs.writeJSON(path.join(__dirname, 'port-config.json'), portConfig);
+    
+    console.log('Setup completed successfully!');
 }
 
-// Add global timeout
-const GLOBAL_TIMEOUT = 300000; // 5 minutes
-console.log('Starting setup process...');
-const setupPromise = setupRepos();
-const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Setup timed out after 5 minutes')), GLOBAL_TIMEOUT);
-});
-
-Promise.race([setupPromise, timeoutPromise])
-    .catch(error => {
-        console.error('\x1b[31m✗ Setup failed:', error.message, '\x1b[0m');
-        console.error('Full error:', error);
-        process.exit(1);
-    }); 
+setupRepos().catch(error => {
+    console.error('Setup failed:', error);
+    process.exit(1);
+}); 

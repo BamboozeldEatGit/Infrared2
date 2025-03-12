@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "dev": "node server.js",
-    "build": "echo 'Build step completed'",
+    "setup": "node setup.js",
+    "build": "npm install && node setup.js",
     "start": "node server.js"
   },
   "engines": {
@@ -15,6 +16,8 @@
     "express": "^4.18.2",
     "node-fetch": "^2.6.9",
     "dotenv": "^16.0.3",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "simple-git": "^3.22.0",
+    "fs-extra": "^11.1.0"
   }
 } 
