@@ -1,5 +1,1 @@
-{
-  "dogePort": 3000,
-  "interstellarPort": 3001,
-  "timestamp": "2025-03-12T01:25:52.865Z"
-}
+{"doge":8000,"interstellar":8080}

@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "node server.js",
     "setup": "node setup.js",
-    "build": "npm install && node setup.js",
-    "start": "node server.js"
+    "build": "npm install && node setup.js && cd repos/doge && npm install && cd ../interstellar && npm install",
+    "start": "node server.js",
+    "vercel-build": "npm run build"
   },
   "engines": {
     "node": ">=18.0.0"
