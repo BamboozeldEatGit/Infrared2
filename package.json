@@ -1,0 +1,15 @@
+{
+  "name": "proxy-switcher",
+  "version": "1.0.0",
+  "description": "A proxy switcher for Doge Unblocker and Interstellar",
+  "main": "server.js",
+  "scripts": {
+    "setup": "node setup.js",
+    "start": "node server.js",
+    "deploy": "node setup.js && node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "simple-git": "^3.22.0"
+  }
+} 
