@@ -5,20 +5,15 @@
   "main": "server.js",
   "scripts": {
     "dev": "node server.js",
-    "setup": "node setup.js",
-    "build": "npm install && node setup.js && cd repos/doge && npm install --production --force && cd ../interstellar && npm install --production --force",
-    "start": "node server.js",
-    "vercel-build": "npm run build"
+    "build": "echo 'Build step completed'",
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
     "express": "^4.18.2",
-    "node-fetch": "^2.6.9",
-    "dotenv": "^16.0.3",
-    "cors": "^2.8.5",
-    "simple-git": "^3.22.0",
-    "fs-extra": "^11.1.0"
+    "http-proxy-middleware": "^2.0.6",
+    "cors": "^2.8.5"
   }
 } 
