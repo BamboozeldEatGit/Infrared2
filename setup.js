@@ -102,34 +102,27 @@ async function cleanup() {
     }
 }
 
-async function setupRepo(git, repoUrl, localPath, name) {
-    console.log(`\nSetting up ${name}...`);
+async function downloadAndExtract(url, dir) {
+    console.log(`Downloading and extracting to ${dir}...`);
     try {
-        // Clone the repository
-        console.log(`Cloning ${name} from ${repoUrl} to ${localPath}...`);
-        await git.clone(repoUrl, localPath, ['--depth', '1']);
-        
-        // Verify clone was successful
-        const packageJsonPath = path.join(localPath, 'package.json');
-        try {
-            await fs.access(packageJsonPath);
-            console.log(`\x1b[32m✓ ${name} cloned successfully\x1b[0m`);
-        } catch (err) {
-            throw new Error(`Failed to clone ${name} repository - package.json not found`);
-        }
+        // Create directory
+        await fs.ensureDir(dir);
 
-        // Install dependencies
-        console.log(`Installing dependencies for ${name}...`);
-        execSync('npm install', {
-            cwd: localPath,
-            stdio: 'inherit'
+        // Download and extract using git clone with depth 1
+        execSync(`git clone --depth=1 ${url} ${dir}`, {
+            stdio: 'inherit',
+            env: {
+                ...process.env,
+                GIT_TERMINAL_PROMPT: '0'
+            }
         });
 
-        console.log(`\x1b[32m✓ ${name} setup completed!\x1b[0m`);
+        // Remove .git directory to save space and avoid permission issues
+        await fs.remove(path.join(dir, '.git'));
+
         return true;
     } catch (error) {
-        console.error(`\x1b[31m✗ Error setting up ${name}:`, error.message, '\x1b[0m');
-        console.error('Full error:', error);
+        console.error('Download failed:', error);
         return false;
     }
 }
@@ -143,15 +136,25 @@ async function setupRepos() {
     await fs.ensureDir(reposDir);
     await fs.emptyDir(reposDir);
     
-    // Clone Doge Unblocker
-    console.log('Cloning Doge Unblocker...');
+    // Download repositories
     const dogeDir = path.join(reposDir, 'doge');
-    await simpleGit().clone('https://github.com/DogeNetwork/Doge-Unblocker.git', dogeDir);
-    
-    // Clone Interstellar
-    console.log('Cloning Interstellar...');
     const interstellarDir = path.join(reposDir, 'interstellar');
-    await simpleGit().clone('https://github.com/interstellarnetwork/interstellar.git', interstellarDir);
+    
+    console.log('Setting up Doge Unblocker...');
+    const dogeSuccess = await downloadAndExtract(
+        'https://github.com/DogeNetwork/Doge-Unblocker.git',
+        dogeDir
+    );
+    
+    console.log('Setting up Interstellar...');
+    const interstellarSuccess = await downloadAndExtract(
+        'https://github.com/interstellarnetwork/interstellar.git',
+        interstellarDir
+    );
+    
+    if (!dogeSuccess || !interstellarSuccess) {
+        throw new Error('Failed to set up one or more repositories');
+    }
     
     // Create .env files
     console.log('Creating environment files...');
@@ -174,9 +177,6 @@ PORT=8080
     
     await fs.writeFile(path.join(interstellarDir, '.env'), interstellarEnv);
     
-    // Install dependencies
-    console.log('Installing dependencies...');
-    
     // Save port configuration
     const portConfig = {
         doge: 8000,
@@ -188,6 +188,7 @@ PORT=8080
     console.log('Setup completed successfully!');
 }
 
+// Run setup with error handling
 setupRepos().catch(error => {
     console.error('Setup failed:', error);
     process.exit(1);

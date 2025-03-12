@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node server.js",
     "setup": "node setup.js",
-    "build": "npm install && node setup.js && cd repos/doge && npm install && cd ../interstellar && npm install",
+    "build": "npm install && node setup.js && cd repos/doge && npm install --production --force && cd ../interstellar && npm install --production --force",
     "start": "node server.js",
     "vercel-build": "npm run build"
   },
