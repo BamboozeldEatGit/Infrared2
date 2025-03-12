@@ -8,6 +8,7 @@ A proxy switcher that combines Doge Unblocker and Interstellar proxies into one 
 - Easy switching between proxies
 - Health check endpoint
 - Docker support
+- Vercel deployment support
 - Beautiful ASCII art interface
 
 ## Quick Start
@@ -41,11 +42,32 @@ docker build -t infrared-proxy .
 docker run -p 8081:8081 -p 8000:8000 -p 8080:8080 infrared-proxy
 ```
 
+### Vercel Deployment
+
+1. Install Vercel CLI:
+```bash
+npm i -g vercel
+```
+
+2. Login to Vercel:
+```bash
+vercel login
+```
+
+3. Deploy to Vercel:
+```bash
+npm run vercel-deploy
+```
+
+The application will be deployed to a Vercel URL, which will be shown in the console after deployment.
+
 ## Available Commands
 
 - `npm run setup` - Setup the repositories and configuration
 - `npm start` - Start the server
 - `npm run deploy` - Run setup and start the server (recommended)
+- `npm run vercel-build` - Build for Vercel deployment
+- `npm run vercel-deploy` - Deploy to Vercel
 
 ## Health Check
 

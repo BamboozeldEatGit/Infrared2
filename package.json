@@ -6,10 +6,15 @@
   "scripts": {
     "setup": "node setup.js",
     "start": "node server.js",
-    "deploy": "node setup.js && node server.js"
+    "deploy": "node setup.js && node server.js",
+    "vercel-build": "npm run setup",
+    "vercel-deploy": "vercel deploy --prod"
   },
   "dependencies": {
     "express": "^4.18.2",
     "simple-git": "^3.22.0"
+  },
+  "devDependencies": {
+    "vercel": "latest"
   }
 } 
