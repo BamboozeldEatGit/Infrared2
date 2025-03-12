@@ -8,23 +8,19 @@
   ],
   "routes": [
     {
-      "src": "/doge/(.*)",
-      "dest": "http://localhost:8000/$1"
+      "src": "/doge",
+      "dest": "/api/proxy.js?type=doge"
     },
     {
-      "src": "/interstellar/(.*)",
-      "dest": "http://localhost:8080/$1"
+      "src": "/interstellar",
+      "dest": "/api/proxy.js?type=interstellar"
     },
     {
       "src": "/(.*)",
-      "dest": "server.js"
+      "dest": "/server.js"
     }
   ],
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  },
-  "installCommand": "npm install",
-  "buildCommand": "npm run setup"
+  "env": {
+    "NODE_ENV": "production"
+  }
 } 
