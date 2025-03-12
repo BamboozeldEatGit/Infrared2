@@ -8,12 +8,20 @@
   ],
   "routes": [
     {
+      "src": "/doge/(.*)",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/interstellar/(.*)",
+      "dest": "/server.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/server.js"
     }
   ],
-  "buildCommand": "npm run setup",
-  "outputDirectory": ".",
+  "buildCommand": "npm run vercel-build",
+  "installCommand": "npm install",
   "env": {
     "NODE_ENV": "production"
   }

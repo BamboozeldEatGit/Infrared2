@@ -7,7 +7,7 @@
     "setup": "node setup.js",
     "start": "node server.js",
     "deploy": "node setup.js && node server.js",
-    "vercel-build": "npm run setup",
+    "vercel-build": "node setup.js && echo 'Build completed'",
     "vercel-deploy": "vercel deploy --prod"
   },
   "dependencies": {
