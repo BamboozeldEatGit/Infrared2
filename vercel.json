@@ -5,22 +5,18 @@
       "src": "server.js",
       "use": "@vercel/node",
       "config": {
-        "includeFiles": ["repos/**"]
+        "includeFiles": ["repos/**/*", "public/**/*"]
       }
-    },
-    {
-      "src": "api/**/*.js",
-      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/doge(.*)",
-      "dest": "/api/proxy?type=doge"
+      "src": "/doge/(.*)",
+      "dest": "/server.js"
     },
     {
-      "src": "/interstellar(.*)",
-      "dest": "/api/proxy?type=interstellar"
+      "src": "/interstellar/(.*)",
+      "dest": "/server.js"
     },
     {
       "src": "/(.*)",
