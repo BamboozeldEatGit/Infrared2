@@ -1,39 +1,54 @@
-const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
+const fetch = require('node-fetch');
 
-const app = express();
-
-module.exports = (req, res) => {
+module.exports = async (req, res) => {
   const type = req.query.type;
-  const path = req.url.replace(`/${type}`, '');
+  const path = req.url.split('?')[0];
   
-  if (type === 'doge') {
-    const proxy = createProxyMiddleware({
-      target: process.env.DOGE_URL || 'https://doge-unblocker.vercel.app',
-      changeOrigin: true,
-      pathRewrite: {
-        [`^/doge`]: ''
-      },
-      onProxyRes: (proxyRes, req, res) => {
-        proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-      }
-    });
-    return proxy(req, res);
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
+
+  // Handle OPTIONS request for CORS
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
-  
-  if (type === 'interstellar') {
-    const proxy = createProxyMiddleware({
-      target: process.env.INTERSTELLAR_URL || 'https://interstellar-proxy.vercel.app',
-      changeOrigin: true,
-      pathRewrite: {
-        [`^/interstellar`]: ''
+
+  try {
+    let targetUrl;
+    if (type === 'doge') {
+      targetUrl = process.env.DOGE_URL || 'https://doge-unblocker.vercel.app';
+    } else if (type === 'interstellar') {
+      targetUrl = process.env.INTERSTELLAR_URL || 'https://interstellar-proxy.vercel.app';
+    } else {
+      return res.status(400).json({ error: 'Invalid proxy type' });
+    }
+
+    // Forward the request to the target
+    const proxyUrl = `${targetUrl}${path}`;
+    console.log('Proxying to:', proxyUrl);
+
+    const proxyRes = await fetch(proxyUrl, {
+      method: req.method,
+      headers: {
+        ...req.headers,
+        host: new URL(targetUrl).host,
       },
-      onProxyRes: (proxyRes, req, res) => {
-        proxyRes.headers['Access-Control-Allow-Origin'] = '*';
-      }
+      body: req.method !== 'GET' && req.method !== 'HEAD' ? req.body : undefined,
     });
-    return proxy(req, res);
+
+    // Forward the response headers
+    Object.entries(proxyRes.headers.raw()).forEach(([key, value]) => {
+      res.setHeader(key, value);
+    });
+
+    // Forward the response
+    res.status(proxyRes.status);
+    const data = await proxyRes.buffer();
+    res.send(data);
+
+  } catch (error) {
+    console.error('Proxy error:', error);
+    res.status(500).json({ error: 'Proxy error', message: error.message });
   }
-  
-  return res.status(400).json({ error: 'Invalid proxy type' });
 }; 
