@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/doge/(.*)",
+      "dest": "http://localhost:8000/$1"
+    },
+    {
+      "src": "/interstellar/(.*)",
+      "dest": "http://localhost:8080/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
+  ],
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "installCommand": "npm install",
+  "buildCommand": "npm run setup"
+} 
