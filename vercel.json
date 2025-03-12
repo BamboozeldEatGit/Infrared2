@@ -4,33 +4,27 @@
     {
       "src": "server.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/doge",
-      "dest": "/api/proxy.js?type=doge"
+      "src": "/doge(.*)",
+      "dest": "/api/proxy?type=doge"
     },
     {
-      "src": "/interstellar",
-      "dest": "/api/proxy.js?type=interstellar"
+      "src": "/interstellar(.*)",
+      "dest": "/api/proxy?type=interstellar"
     },
     {
       "src": "/(.*)",
       "dest": "/server.js"
     }
   ],
-  "functions": {
-    "api/*.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
-  "build": {
-    "env": {
-      "NODE_ENV": "production"
-    }
-  },
-  "installCommand": "npm install",
-  "buildCommand": "npm run setup"
+  "env": {
+    "NODE_ENV": "production"
+  }
 } 
